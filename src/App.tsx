@@ -1,5 +1,6 @@
 import { Box, Flex, Heading, Text } from '@chakra-ui/react'
 import { VesselMap } from './components/VesselMap'
+import { StalenessLegend } from './components/StalenessLegend'
 import { useSimulationClock } from './hooks/useSimulationClock'
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
       <Flex flex={1} minH={0}>
         <Box flex={1} bg="bg.canvas" position="relative">
           <VesselMap />
+          <StalenessLegend />
         </Box>
         <Box
           w="420px"

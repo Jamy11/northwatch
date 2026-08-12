@@ -19,6 +19,7 @@ export interface Vessel {
   heading: number
   lastSeen: number
   broadcasting: boolean
+  nextReportDue: number
 }
 
 export type StalenessBucket = 'fresh' | 'aging' | 'stale' | 'dropped'

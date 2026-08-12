@@ -1,6 +1,10 @@
 import type { ShipType, Vessel } from '../types/vessel'
 import { isOnLand } from './landmask'
 
+// AIS report cadence per vessel: 5s-5min, randomized independently of lastSeen's
+// initial age so staggered refreshes don't wash out the deliberate staleness spread.
+export const REPORT_INTERVAL_RANGE_MS: [number, number] = [5_000, 300_000]
+
 // Maritime Identification Digits seen in North Atlantic / Grand Banks traffic.
 const MID_POOL = [
   316, // Canada
@@ -144,7 +148,9 @@ function generateName(shipType: ShipType): string {
   return name
 }
 
-export function generateVessels(count = 150): Vessel[] {
+const MIN_DROPPED = 10
+
+export function generateVessels(count = 100): Vessel[] {
   const used = new Set<number>()
   const now = Date.now()
   const vessels: Vessel[] = []
@@ -154,10 +160,14 @@ export function generateVessels(count = 150): Vessel[] {
     const { lat, lon } = generateSeaPosition()
     const sog = Math.round(randInRange(SOG_RANGE_BY_TYPE[shipType]) * 10) / 10
     const cog = Math.round(Math.random() * 359)
-    // Deliberately spread lastSeen: mostly recent, tail stretching to ~60 min ago.
-    const ageMinutes = Math.pow(Math.random(), 2) * 60
+
+    // Reserve the first MIN_DROPPED vessels as guaranteed-dropped: permanently
+    // off the air, last seen 30-90 min ago, so the map always shows some gray.
+    const forceDropped = i < MIN_DROPPED
+    const ageMinutes = forceDropped ? 30 + Math.random() * 60 : Math.pow(Math.random(), 2) * 60
     const lastSeen = now - ageMinutes * 60_000
-    const broadcasting = Math.random() >= 0.15
+    const broadcasting = forceDropped ? false : Math.random() >= 0.15
+    const nextReportDue = now + randInRange(REPORT_INTERVAL_RANGE_MS)
 
     vessels.push({
       mmsi: generateMmsi(used),
@@ -170,6 +180,7 @@ export function generateVessels(count = 150): Vessel[] {
       heading: cog,
       lastSeen,
       broadcasting,
+      nextReportDue,
     })
   }
 

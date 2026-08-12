@@ -5,10 +5,12 @@ import { Box } from '@chakra-ui/react'
 import { useVesselStore } from '../store/vesselStore'
 import { vesselsToGeoJSON } from '../lib/vesselGeoJson'
 import { createVesselIcon } from '../lib/vesselIcon'
+import { STALENESS_COLOR } from '../lib/staleness'
 
 const VESSEL_SOURCE_ID = 'vessels'
 const VESSEL_LAYER_ID = 'vessels-layer'
 const GRAND_BANKS_CENTER: [number, number] = [-51, 46]
+const STALENESS_TICK_MS = 10_000
 
 export function VesselMap() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -25,12 +27,18 @@ export function VesselMap() {
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
 
+    const syncSource = () => {
+      const source = map.getSource(VESSEL_SOURCE_ID) as maplibregl.GeoJSONSource | undefined
+      if (!source) return
+      source.setData(vesselsToGeoJSON(useVesselStore.getState().vessels, Date.now()))
+    }
+
     map.on('load', () => {
       map.addImage('vessel-arrow', createVesselIcon(24), { sdf: true })
 
       map.addSource(VESSEL_SOURCE_ID, {
         type: 'geojson',
-        data: vesselsToGeoJSON(useVesselStore.getState().vessels),
+        data: vesselsToGeoJSON(useVesselStore.getState().vessels, Date.now()),
       })
 
       map.addLayer({
@@ -46,7 +54,32 @@ export function VesselMap() {
           'icon-ignore-placement': true,
         },
         paint: {
-          'icon-color': '#4ADE80',
+          'icon-color': [
+            'match',
+            ['get', 'staleness'],
+            'fresh',
+            STALENESS_COLOR.fresh,
+            'aging',
+            STALENESS_COLOR.aging,
+            'stale',
+            STALENESS_COLOR.stale,
+            'dropped',
+            STALENESS_COLOR.dropped,
+            STALENESS_COLOR.fresh,
+          ],
+          'icon-opacity': [
+            'match',
+            ['get', 'staleness'],
+            'fresh',
+            1,
+            'aging',
+            0.85,
+            'stale',
+            0.55,
+            'dropped',
+            0.4,
+            1,
+          ],
         },
       })
 
@@ -65,14 +98,16 @@ export function VesselMap() {
       })
     })
 
-    const unsubscribe = useVesselStore.subscribe((state) => {
-      const source = map.getSource(VESSEL_SOURCE_ID) as maplibregl.GeoJSONSource | undefined
-      if (!source) return
-      source.setData(vesselsToGeoJSON(state.vessels))
-    })
+    // Vessel position/lastSeen changes (dead-reckoning ticks) update the map immediately.
+    const unsubscribe = useVesselStore.subscribe(syncSource)
+
+    // Staleness ages purely with elapsed time, independent of position ticks, so
+    // frozen (non-broadcasting) vessels still need a periodic resync to shift buckets.
+    const staleTimer = setInterval(syncSource, STALENESS_TICK_MS)
 
     return () => {
       unsubscribe()
+      clearInterval(staleTimer)
       map.remove()
     }
   }, [])
