@@ -20,6 +20,7 @@ const LAND_BOXES: LandBox[] = [
   { lonMin: -56.45, lonMax: -56.15, latMin: 46.75, latMax: 46.95 }, // St-Pierre et Miquelon
   { lonMin: -57.7, lonMax: -55.3, latMin: 51.2, latMax: 52.6 }, // Southern Labrador coast / Strait of Belle Isle
   { lonMin: -60.0, lonMax: -57.6, latMin: 50.2, latMax: 52.6 }, // Quebec Lower North Shore
+  { lonMin: -61.6, lonMax: -59.2, latMin: 45.5, latMax: 47.05 }, // Cape Breton Island
 ]
 
 export function isOnLand(lat: number, lon: number): boolean {

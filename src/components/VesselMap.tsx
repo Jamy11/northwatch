@@ -134,8 +134,6 @@ export function VesselMap() {
             STALENESS_COLOR.aging,
             'stale',
             STALENESS_COLOR.stale,
-            'dropped',
-            STALENESS_COLOR.dropped,
             STALENESS_COLOR.fresh,
           ],
           'icon-opacity': [
@@ -147,8 +145,6 @@ export function VesselMap() {
             0.85,
             'stale',
             0.55,
-            'dropped',
-            0.4,
             1,
           ],
         },

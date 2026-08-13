@@ -34,7 +34,7 @@ export function ContactTable() {
   const now = useNow(10_000)
 
   const [sortField, setSortField] = useState<SortField>('lastSeen')
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [activeBuckets, setActiveBuckets] = useState<Set<StalenessBucket>>(new Set(ALL_BUCKETS))
 
   const bodyRef = useRef<HTMLTableSectionElement>(null)
@@ -87,13 +87,13 @@ export function ContactTable() {
 
   return (
     <Flex direction="column" h="100%" minH={0}>
-      <Flex gap={2} p={3} borderBottom="1px solid" borderColor="border.subtle" wrap="wrap">
+      <Flex gap={2} p={2} borderBottom="1px solid" borderColor="border.subtle" wrap="wrap" flexShrink={0}>
         {ALL_BUCKETS.map((bucket) => {
           const active = activeBuckets.has(bucket)
           return (
             <Button
               key={bucket}
-              size="xs"
+              size="2xs"
               variant="outline"
               onClick={() => toggleBucket(bucket)}
               opacity={active ? 1 : 0.4}
@@ -106,8 +106,15 @@ export function ContactTable() {
         })}
       </Flex>
 
-      <Box flex={1} minH={0} overflowY="auto">
-        <Table.Root size="sm" stickyHeader variant="line" color="gray.200">
+      <Box flex={1} minH={0} minW={0} overflow="auto">
+        <Table.Root
+          size="sm"
+          stickyHeader
+          variant="line"
+          color="gray.200"
+          fontSize="xs"
+          whiteSpace="nowrap"
+        >
           <Table.Header>
             <Table.Row bg="bg.panel">
               {COLUMNS.map(({ field, label }) => (
@@ -116,13 +123,17 @@ export function ContactTable() {
                   cursor="pointer"
                   userSelect="none"
                   color="gray.400"
+                  px={2}
+                  py={1}
                   onClick={() => toggleSort(field)}
                 >
                   {label}
                   {sortField === field ? (sortDirection === 'asc' ? ' ▲' : ' ▼') : ''}
                 </Table.ColumnHeader>
               ))}
-              <Table.ColumnHeader color="gray.400">Status</Table.ColumnHeader>
+              <Table.ColumnHeader color="gray.400" px={2} py={1}>
+                Status
+              </Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body ref={bodyRef}>
@@ -135,16 +146,32 @@ export function ContactTable() {
                 bg={selectedMmsi === vessel.mmsi ? 'whiteAlpha.100' : 'transparent'}
                 _hover={{ bg: 'whiteAlpha.50' }}
               >
-                <Table.Cell fontFamily="mono" fontSize="xs">
+                <Table.Cell px={2} py={1} fontFamily="mono">
                   {vessel.mmsi}
                 </Table.Cell>
-                <Table.Cell>{vessel.name}</Table.Cell>
-                <Table.Cell>{vessel.shipType}</Table.Cell>
-                <Table.Cell>{vessel.sog.toFixed(1)} kn</Table.Cell>
-                <Table.Cell>{vessel.cog}°</Table.Cell>
-                <Table.Cell whiteSpace="nowrap">{formatTimeAgo(vessel.lastSeen, now)}</Table.Cell>
-                <Table.Cell>
-                  <Badge bg={STALENESS_COLOR[staleness]} color="black" fontSize="2xs">
+                <Table.Cell px={2} py={1} maxW="120px" overflow="hidden" textOverflow="ellipsis" title={vessel.name}>
+                  {vessel.name}
+                </Table.Cell>
+                <Table.Cell px={2} py={1}>
+                  {vessel.shipType}
+                </Table.Cell>
+                <Table.Cell px={2} py={1}>
+                  {vessel.sog.toFixed(1)} kn
+                </Table.Cell>
+                <Table.Cell px={2} py={1}>
+                  {vessel.cog}°
+                </Table.Cell>
+                <Table.Cell px={2} py={1}>
+                  {formatTimeAgo(vessel.lastSeen, now)}
+                </Table.Cell>
+                <Table.Cell px={2} py={1}>
+                  <Badge
+                    bg={STALENESS_COLOR[staleness]}
+                    color="black"
+                    fontSize="2xs"
+                    borderRadius="full"
+                    px={2}
+                  >
                     {STALENESS_LABEL[staleness]}
                   </Badge>
                 </Table.Cell>

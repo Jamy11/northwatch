@@ -3,6 +3,7 @@ import { Box, Flex, Heading, Text } from '@chakra-ui/react'
 import { VesselMap } from './components/VesselMap'
 import { StalenessLegend } from './components/StalenessLegend'
 import { ContactTable } from './components/ContactTable'
+import { HeaderStats } from './components/HeaderStats'
 import { useSimulationClock } from './hooks/useSimulationClock'
 
 const MIN_PANEL_WIDTH = 280
@@ -56,6 +57,7 @@ function App() {
         <Text ml={3} fontSize="sm" color="gray.500">
           Grand Banks — Maritime Domain Awareness
         </Text>
+        <HeaderStats />
       </Flex>
 
       <Flex flex={1} minH={0}>
@@ -73,7 +75,7 @@ function App() {
           onMouseDown={handleMouseDown}
         />
 
-        <Box w={`${panelWidth}px`} flexShrink={0} bg="bg.panel">
+        <Box w={`${panelWidth}px`} minW={0} flexShrink={0} bg="bg.panel" overflow="hidden">
           <ContactTable />
         </Box>
       </Flex>

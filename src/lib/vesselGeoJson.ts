@@ -5,6 +5,7 @@ import { getStaleness } from './staleness'
 export function vesselsToGeoJSON(vessels: Vessel[], now: number): FeatureCollection<Point> {
   const features = vessels
     .map((v) => ({ v, staleness: getStaleness(v.lastSeen, now) }))
+    .filter(({ staleness }) => staleness !== 'dropped')
     .map(({ v, staleness }) => ({
       type: 'Feature' as const,
       geometry: { type: 'Point' as const, coordinates: [v.lon, v.lat] },
