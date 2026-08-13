@@ -8,8 +8,6 @@ A synthetic maritime domain awareness (MDA) dashboard for the Grand Banks off Ne
 
 No backend. A client-side simulation clock drives ~100 synthetic AIS contacts, advancing their positions by dead reckoning and periodically refreshing their last-seen time. A portion of vessels go silent so you can watch contacts age in real time.
 
-Built as a scoped, single-day project for a job application: a few features done well rather than broad, half-finished coverage.
-
 ## Stack
 
 - Vite + React 18 + TypeScript (strict)
