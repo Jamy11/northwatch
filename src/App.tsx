@@ -1,10 +1,42 @@
+import { useCallback, useRef, useState } from 'react'
 import { Box, Flex, Heading, Text } from '@chakra-ui/react'
 import { VesselMap } from './components/VesselMap'
 import { StalenessLegend } from './components/StalenessLegend'
+import { ContactTable } from './components/ContactTable'
 import { useSimulationClock } from './hooks/useSimulationClock'
+
+const MIN_PANEL_WIDTH = 280
+const MAX_PANEL_WIDTH = 680
+const DEFAULT_PANEL_WIDTH = 420
 
 function App() {
   useSimulationClock()
+  const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL_WIDTH)
+  const draggingRef = useRef(false)
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    draggingRef.current = true
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      if (!draggingRef.current) return
+      const width = window.innerWidth - moveEvent.clientX
+      setPanelWidth(Math.min(MAX_PANEL_WIDTH, Math.max(MIN_PANEL_WIDTH, width)))
+    }
+
+    const handleMouseUp = () => {
+      draggingRef.current = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+  }, [])
 
   return (
     <Flex direction="column" h="100vh" bg="bg.canvas" color="gray.100">
@@ -31,13 +63,19 @@ function App() {
           <VesselMap />
           <StalenessLegend />
         </Box>
+
         <Box
-          w="420px"
+          w="6px"
           flexShrink={0}
-          bg="bg.panel"
-          borderLeft="1px solid"
-          borderColor="border.subtle"
+          cursor="col-resize"
+          bg="border.subtle"
+          _hover={{ bg: 'gray.500' }}
+          onMouseDown={handleMouseDown}
         />
+
+        <Box w={`${panelWidth}px`} flexShrink={0} bg="bg.panel">
+          <ContactTable />
+        </Box>
       </Flex>
     </Flex>
   )

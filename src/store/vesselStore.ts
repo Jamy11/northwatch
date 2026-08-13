@@ -7,17 +7,28 @@ function randInRange([min, max]: [number, number]): number {
   return min + Math.random() * (max - min)
 }
 
+interface FlyToRequest {
+  mmsi: number
+  token: number
+}
+
 interface VesselState {
   vessels: Vessel[]
   selectedMmsi: number | null
+  flyToRequest: FlyToRequest | null
   setSelectedMmsi: (mmsi: number | null) => void
+  selectFromTable: (mmsi: number) => void
   tick: (dtMs: number) => void
 }
 
 export const useVesselStore = create<VesselState>((set) => ({
   vessels: generateVessels(100),
   selectedMmsi: null,
+  flyToRequest: null,
+  // Map clicks: select only, the vessel is already on-screen.
   setSelectedMmsi: (mmsi) => set({ selectedMmsi: mmsi }),
+  // Table row clicks: select and ask the map to pan to it.
+  selectFromTable: (mmsi) => set({ selectedMmsi: mmsi, flyToRequest: { mmsi, token: Date.now() } }),
   tick: (dtMs) =>
     set((state) => {
       const now = Date.now()

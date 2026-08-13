@@ -169,10 +169,21 @@ export function VesselMap() {
       })
     })
 
+    let lastFlyToToken = -1
+    const syncFlyTo = () => {
+      const { flyToRequest, vessels } = useVesselStore.getState()
+      if (!flyToRequest || flyToRequest.token === lastFlyToToken) return
+      lastFlyToToken = flyToRequest.token
+      const vessel = vessels.find((v) => v.mmsi === flyToRequest.mmsi)
+      if (!vessel) return
+      map.flyTo({ center: [vessel.lon, vessel.lat] })
+    }
+
     // Vessel position/lastSeen changes (dead-reckoning ticks) update the map immediately.
     const unsubscribe = useVesselStore.subscribe(() => {
       syncSource()
       syncUncertaintyCircle()
+      syncFlyTo()
     })
 
     // Staleness ages purely with elapsed time, independent of position ticks, so
