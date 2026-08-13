@@ -2,6 +2,8 @@
 
 **Live demo:** [jamy11.github.io/northwatch](https://jamy11.github.io/northwatch/)
 
+![NorthWatch dashboard showing the vessel map, contact table, and a growing uncertainty circle around a selected stale contact](screenshot.png)
+
 A synthetic maritime domain awareness (MDA) dashboard for the Grand Banks off Newfoundland, showing vessel traffic, contact staleness, and dead-reckoning uncertainty rendered live on a dark-themed map.
 
 No backend. A client-side simulation clock drives ~100 synthetic AIS contacts, advancing their positions by dead reckoning and periodically refreshing their last-seen time. A portion of vessels go silent so you can watch contacts age in real time.
